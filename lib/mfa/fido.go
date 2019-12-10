@@ -100,14 +100,14 @@ func (d *FidoClient) ChallengeU2f() (*SignedAssertion, error) {
 					ClientData:    response.ClientData,
 					SignatureData: response.SignatureData,
 				}
-				fmt.Printf("  ==> Touch accepted. Proceeding with authentication\n")
+				log.Printf("  ==> Touch accepted. Proceeding with authentication\n")
 				return responsePayload, nil
 			}
 
 			switch t := err.(type) {
 			case *u2fhost.TestOfUserPresenceRequiredError:
 				if !prompted {
-					fmt.Printf("\nTouch the flashing U2F device to authenticate...\n")
+					log.Printf("\nTouch the flashing U2F device to authenticate...\n")
 					prompted = true
 				}
 			default:

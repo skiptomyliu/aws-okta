@@ -11,15 +11,11 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/sirupsen/logrus"
-
-	"net/url"
-
 	u2fhost "github.com/marshallbrekka/go-u2fhost"
-
-	uniformResourceLocator "net/url"
-
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/net/html"
+	"net/url"
+	uniformResourceLocator "net/url"
 )
 
 type DuoClient struct {
@@ -171,7 +167,7 @@ func (d *DuoClient) ChallengeU2f(verificationHost string) (err error) {
 			}
 			select {
 			case <-timeout:
-				fmt.Println("Failed to get registration response after 25 seconds")
+				log.Warn("Failed to get registration response after 25 seconds")
 				break
 			case <-interval.C:
 				for _, device := range openDevices {
@@ -180,12 +176,11 @@ func (d *DuoClient) ChallengeU2f(verificationHost string) (err error) {
 						log.Printf("Authentication succeeded, continuing")
 					} else if _, ok := err.(*u2fhost.TestOfUserPresenceRequiredError); ok {
 						if !prompted {
-							fmt.Println("Touch the flashing U2F device to authenticate...")
-							fmt.Println()
+							log.Println("Touch the flashing U2F device to authenticate...")
 						}
 						prompted = true
 					} else {
-						fmt.Printf("Got status response %#v\n", err)
+						log.Printf("Got status response %#v\n", err)
 						break
 					}
 				}
