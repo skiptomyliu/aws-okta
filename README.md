@@ -2,15 +2,11 @@
 
 `aws-okta` allows you to authenticate with AWS using your Okta credentials.
 
+⚠️ As per [#278](https://github.com/segmentio/aws-okta/issues/278), development and maintenance of `aws-okta` is halted. If you're not already using it, now would be a bad time to start. ⚠️
+
 ## Installing
 
-If you have a functional go environment, you can install with:
-
-```bash
-$ go get github.com/segmentio/aws-okta
-```
-
-[See the wiki for more installation options like Linux packages and precompiled binaries.](https://github.com/segmentio/aws-okta/wiki/Installation)
+[See the wiki for more installation options.](https://github.com/segmentio/aws-okta/wiki/Installation)
 
 ### MacOS
 
@@ -19,6 +15,12 @@ You can install with `brew`:
 ```bash
 $ brew install aws-okta
 ```
+
+Shout-out to the fine maintainers of [the core formula](https://github.com/Homebrew/homebrew-core/blob/master/Formula/aws-okta.rb).
+
+### Linux
+
+[Download a binary from our release page](https://github.com/segmentio/aws-okta/releases), or [see the wiki for more installation options like deb/rpm packages](https://github.com/segmentio/aws-okta/wiki/Installation).
 
 ### Windows
 
@@ -50,7 +52,7 @@ Usage:
   aws-okta exec <profile> -- <command>
 
 Flags:
-  -a, --assume-role-ttl duration   Expiration time for assumed role (default 15m0s)
+  -a, --assume-role-ttl duration   Expiration time for assumed role (default 1h0m0s)
   -h, --help                       help for exec
   -t, --session-ttl duration       Expiration time for okta role session (default 1h0m0s)
 
@@ -147,9 +149,14 @@ role_arn = arn:aws:iam::<account-id>:role/<okta-role-name>
 okta_account_name = account-b
 ```
 
-#### Configuring Okta session and AWS assume role TTLs
+#### Configuring Okta assume role and AWS assume role TTLs
 
-The default TTLs for both Okta sessions and AWS assumed roles is 1 hour.  This means that aws-okta will re-authenticate to Okta and AWS credentials will expire every hour.  In addition to specifying the Okta session and AWS assume role TTLs with the command-line flags, they can be set using the `AWS_SESSION_TTL` and `AWS_ASSUME_ROLE_TTL` environment variables respectively.
+The default TTLs for both the initial SAML assumed role and secondary AWS assumed roles are 1 hour.  This means that AWS credentials will expire every hour.
+
+* *session-ttl*: Duration of initial role assumed by Okta
+* *assume-role-ttl*: Duration of second role assumed
+
+In addition to specifying session and AWS assume role TTLs with command-line flags, they can be set using environment variables.
 
 ```bash
 export AWS_SESSION_TTL=1h
@@ -159,10 +166,15 @@ export AWS_ASSUME_ROLE_TTL=1h
 The AWS assume role TTL can also be set per-profile in the aws config:
 
 ```ini
-# example with a role that's configured with a max session duration of 12 hours
+# Example with an initial and secondary role that are configured with a max session duration of 12 hours
 [profile ttldemo]
 aws_saml_url = home/amazon_aws/cuZGoka9dAIFcyG0UllG/214
 role_arn = arn:aws:iam::<account-id>:role/<okta-role-name>
+session_ttl = 12h
+
+[profile ttldemo-role]
+source_profile = ttldemo
+role_arn = arn:aws:iam::<account-id>:role/<secondary-role-name>
 assume_role_ttl = 12h
 ```
 
